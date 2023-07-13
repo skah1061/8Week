@@ -42,7 +42,7 @@ public class LikeService {
             Optional<Like> like_id = likeRepository.findByUserAndPost(userDetails.getUser(), post);
 
 
-성            deletePostLike(like_id.get().getId(),userDetails.getUser());
+            deletePostLike(like_id.get().getId(),userDetails.getUser());
             //throw new IllegalArgumentException("좋아요를 누른적이 있습니다.");
             return null;
         }
