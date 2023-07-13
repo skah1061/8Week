@@ -1,6 +1,6 @@
 package com.example.sparta.oauthproject.controller;
 
-import com.example.sparta.oauthproject.dto.ApiResponseDto;
+import com.example.sparta.oauthproject.exception.ApiResponseDto;
 import com.example.sparta.oauthproject.dto.CommentRequestDto;
 import com.example.sparta.oauthproject.security.UserDetailsImpl;
 import com.example.sparta.oauthproject.service.CommentService;

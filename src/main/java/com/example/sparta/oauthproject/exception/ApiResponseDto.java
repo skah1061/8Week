@@ -1,4 +1,4 @@
-package com.example.sparta.oauthproject.dto;
+package com.example.sparta.oauthproject.exception;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;

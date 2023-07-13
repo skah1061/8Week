@@ -4,25 +4,32 @@ import com.example.sparta.oauthproject.dto.PostRequestDto;
 import com.example.sparta.oauthproject.dto.PostResponseDto;
 import com.example.sparta.oauthproject.entity.Post;
 import com.example.sparta.oauthproject.entity.UserRoleEnum;
+import com.example.sparta.oauthproject.exception.NotFoundException;
+import com.example.sparta.oauthproject.exception.NotHavePermission;
+import com.example.sparta.oauthproject.exception.ProblemToken;
 import com.example.sparta.oauthproject.jwt.JwtUtil;
 import com.example.sparta.oauthproject.repository.PostRepository;
 import com.example.sparta.oauthproject.security.UserDetailsImpl;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
+import java.util.Locale;
 
 @Service
 public class PostService {
     private final PostRepository postRepository;
     private final JwtUtil jwtUtil;
+    private final MessageSource messageSource;
     @Autowired
-    public PostService(PostRepository postRepository, JwtUtil jwtUtil){
+    public PostService(PostRepository postRepository, JwtUtil jwtUtil, MessageSource messageSource){
         this.postRepository = postRepository;
         this.jwtUtil = jwtUtil;
+        this.messageSource = messageSource;
     }
     public PostResponseDto createBlog(HttpServletRequest req, PostRequestDto requestDto, UserDetailsImpl userDetails) {
         String token = jwtUtil.getTokenFromRequest(req);
@@ -61,11 +68,21 @@ public class PostService {
 
                 return requestDto;
             } else {
-                throw new IllegalArgumentException("수정할 권한이 없습니다.");
+                throw new NotHavePermission(messageSource.getMessage(
+                        "not.have.permission",
+                        null,
+                        "You Do Not Have Permission",
+                        Locale.getDefault()
+                ));
             }
         }
         else{
-            throw new IllegalArgumentException("Token Error");
+            throw new ProblemToken(messageSource.getMessage(
+                    "problem.token",
+                    null,
+                    "Problem With the CurrentToken",
+                    Locale.getDefault()
+            ));
         }
     }
     public String deletePost(HttpServletRequest req,Long id,UserDetailsImpl userDetails){
@@ -78,11 +95,21 @@ public class PostService {
                 return "삭제완료";
             }
             else {
-                throw new IllegalArgumentException("해당 권한이 없습니다.");
+                throw new NotHavePermission(messageSource.getMessage(
+                        "not.have.permission",
+                        null,
+                        "You Do Not Have Permission",
+                        Locale.getDefault()
+                ));
             }
         }
         else{
-            throw new IllegalArgumentException("Token Error");
+            throw new ProblemToken(messageSource.getMessage(
+                    "problem.token",
+                    null,
+                    "Problem With the CurrentToken",
+                    Locale.getDefault()
+            ));
         }
     }
     public PostResponseDto detailPost(Long id) {
@@ -92,7 +119,12 @@ public class PostService {
     }
     public Post findPost(Long id){
         Post post = postRepository.findById(id).orElseThrow(() ->
-                new IllegalArgumentException("선택한 게시글이 존재하지 않습니다.")
+                new NotFoundException(messageSource.getMessage(
+                        "not.found.exception",
+                        null,
+                        "NOT FOUND ID",
+                        Locale.getDefault()
+                ))
 
         );
         return post;

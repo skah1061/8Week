@@ -4,21 +4,27 @@ import com.example.sparta.oauthproject.dto.CommentRequestDto;
 import com.example.sparta.oauthproject.entity.Comment;
 import com.example.sparta.oauthproject.entity.Post;
 import com.example.sparta.oauthproject.entity.User;
+import com.example.sparta.oauthproject.exception.NotFoundException;
+import com.example.sparta.oauthproject.exception.NotHavePermission;
 import com.example.sparta.oauthproject.repository.CommentRepository;
 import com.example.sparta.oauthproject.security.UserDetailsImpl;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Locale;
 import java.util.concurrent.RejectedExecutionException;
 
 @Service
 public class CommentService {
     private final CommentRepository commentRepository;
     private final PostService postService;
+    private final MessageSource messageSource;
 
-    public CommentService(CommentRepository commentRepository, PostService postService){
+    public CommentService(CommentRepository commentRepository, PostService postService, MessageSource messageSource){
         this.commentRepository = commentRepository;
         this.postService = postService;
+        this.messageSource= messageSource;
     }
 
 
@@ -35,7 +41,12 @@ public class CommentService {
         if (userDetails.getUsername().equals(comment.getUser().getUsername())) {
             comment.setBody(commentRequestDto.getBody());
         } else {
-            throw new IllegalArgumentException("직접쓴 글이 아니면 수정할 수 없습니다.");
+            throw new NotHavePermission(messageSource.getMessage(
+                    "not.have.permission",
+                    null,
+                    "Not have permission",
+                    Locale.getDefault()
+            ));
         }
     }
 
@@ -50,7 +61,12 @@ public class CommentService {
     }
     public Comment findComment(Long id) {
         return commentRepository.findById(id).orElseThrow(() ->
-                new IllegalArgumentException("해당 댓글은 존재하지 않습니다."));
+                new NotFoundException(messageSource.getMessage(
+                        "not.found.exception",
+                        null,
+                        "NOT FOUND THIS COMMENT",
+                        Locale.getDefault()
+                )));
 
     }
 }
